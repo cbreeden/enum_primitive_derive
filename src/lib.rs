@@ -3,8 +3,20 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use syn::{ Ident, Body, Variant, VariantData };
+use syn::{Ident, Body, Variant, VariantData};
 use proc_macro::TokenStream;
+
+const UNDEFINED: &'static str = "EnumPrimitive is only defined if either: (a) Every discriminant \
+                                 is defined, or (b) No discriminant is defined. Otherwise it is \
+                                 undefined behavior, and there would be no guarantees that \
+                                 `Enum::from_u64(enum as u64) == Some(enum)`.";
+
+#[derive(PartialEq)]
+enum Descriminants {
+    Unknown,
+    None,
+    All,
+}
 
 #[proc_macro_derive(EnumPrimitive)]
 pub fn enum_iterator(input: TokenStream) -> TokenStream {
@@ -14,26 +26,10 @@ pub fn enum_iterator(input: TokenStream) -> TokenStream {
     let name = &ast.ident;
     let gen = match ast.body {
         Body::Enum(ref variants) => impl_derive(name, variants),
-        Body::Struct(_) =>
-            panic!("EnumPrimitive is only defined for C-style enums.")
+        Body::Struct(_) => panic!("EnumPrimitive is only defined for C-style enums."),
     };
     gen.parse().unwrap()
 }
-
-#[derive(PartialEq)]
-enum Descriminants {
-    Unknown,
-    None,
-    All,
-}
-
-const UNDEFINED: &'static str =
-"EnumPrimitive is only defined if either: \
-  (a) Every discriminant is defined, or \
-  (b) No discriminant is defined. \
-Otherwise it is undefined behavior, and there \
-would be no guarantees that \
-`Enum::from_u64(enum as u64) == Some(enum)`.";
 
 fn impl_derive(name: &Ident, variants: &[Variant]) -> quote::Tokens {
     // EnumPrimitive is only defined for enums that are either:
@@ -60,7 +56,7 @@ fn impl_derive(name: &Ident, variants: &[Variant]) -> quote::Tokens {
 
                 desc = Descriminants::All;
                 quote! { #d => Some(#name :: #ident), }
-            },
+            }
 
             None => {
                 if desc == Descriminants::All {

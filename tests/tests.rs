@@ -25,7 +25,7 @@ enum Empty {
 
 }
 
-// Fails to compile
+// Fails to compile - Only defined for C-style enums.
 // #[derive(EnumPrimitive, PartialEq, Debug)]
 // enum Bar2 {
 //     A(u32),
@@ -33,7 +33,13 @@ enum Empty {
 //     C,
 // }
 
-// Fails to compile
+// EnumPrimitive is only defined for enums that are either:
+//  1. Does not declare any discriminant, in which case
+//     the discriminant starts at 0 and incriments.
+//  2. Declares every discriminant.
+// Any other scenario leaves the discriminant undefined afaict.
+
+// Fails to compile:
 // #[derive(EnumPrimitive, PartialEq, Debug)]
 // enum Barr {
 //     A,

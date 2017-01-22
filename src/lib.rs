@@ -32,7 +32,7 @@ const UNDEFINED: &'static str =
   (a) Every discriminant is defined, or \
   (b) No discriminant is defined. \
 Otherwise it is undefined behavior, and there \
-would be no gaurantees that \
+would be no guarantees that \
 `Enum::from_u64(enum as u64) == Some(enum)`.";
 
 fn impl_derive(name: &Ident, variants: &[Variant]) -> quote::Tokens {
